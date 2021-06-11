@@ -71,36 +71,35 @@ const modalWindowCloseBtnEl = document.querySelector('.lightbox__button');
 const lightboxOverlay = document.querySelector('.lightbox__overlay');
 const bigImage = document.querySelector('.lightbox__image');
 
-function createList() {
-  myExport.map((image) => {
+let index = 0;
+let originalImagesArray = [];
+const images = myExport.map((image) => {
     const listItemEl = document.createElement('li');
     const linkEl = document.createElement('a');
     const imgEl = document.createElement('img');
     listItemEl.classList.add('gallery__item');
     linkEl.classList.add('gallery__link');
     linkEl.href = image.original;
+    linkEl.setAttribute("data-index", index += 1);
     imgEl.classList.add('gallery__image');
     imgEl.src = image.preview;
     imgEl.alt = image.description;
+    originalImagesArray.push(image.original);
   
     linkEl.appendChild(imgEl);
-    listItemEl.appendChild(linkEl);
-    galleryList.appendChild(listItemEl);
+  listItemEl.appendChild(linkEl);
+  return listItemEl;
   });
-};
-createList()
+galleryList.append(...images);
 console.log(galleryList);
 
-function stopDefAction(event) {
-  event.preventDefault();
-  // console.log(linkElInList);
-}
-// const linkElInList = document.querySelectorAll('.gallery__link');
-  galleryList.addEventListener(
-    'click', stopDefAction
-);
+galleryList.addEventListener("click", onImageClick);
 
 function onImageClick(event) {
+  event.preventDefault();
+  lightboxOverlay.addEventListener('click', closeTheOverlay);
+  modalWindowCloseBtnEl.addEventListener('click', closeTheOverlay);
+  document.addEventListener('keydown', isButtonPushed);
   if (event.target.nodeName !== 'IMG') {
     return;
   }
@@ -111,27 +110,26 @@ function onImageClick(event) {
   console.log(event.target);
   console.log(bigImage);
 };
-galleryList.addEventListener("click", onImageClick);
 
 function closeTheOverlay(event) {
-  event.target.closest('.js-lightbox').classList.remove('is-open');
+  if (modalWindow.classList.contains('is-open')) {
+  modalWindow.classList.remove('is-open');
   bigImage.src = '';
-  console.log(bigImage);
-};
-lightboxOverlay.addEventListener("click", closeTheOverlay);
-modalWindowCloseBtnEl.addEventListener("click", closeTheOverlay);
-document.addEventListener('keydown', function (e) {
-  if (e.key == 'Escape' && modalWindow.classList.contains('is-open')) {
-    modalWindow.classList.remove('is-open');
-    bigImage.src = '';
+  lightboxOverlay.removeEventListener("click", closeTheOverlay);
+  modalWindowCloseBtnEl.removeEventListener("click", closeTheOverlay);
+  document.addEventListener('keydown', isButtonPushed);
+  console.log(bigImage); 
   }
-  // console.log(e.key);
-});
-document.addEventListener('keydown', function (e) {
-  if (e.key == 'ArrowLeft' && modalWindow.classList.contains('is-open')) {
-    bigImage.src = e.currentTarget.previousElementSibling.currentSrc;
-    console.log(bigImage.previousSibling);
-  } else if (e.key == 'ArrowRight' && modalWindow.classList.contains('is-open')) {
-      bigImage.src = bigImage.nextElementSibling.currentSrc;
-    }
-});
+};
+
+function isButtonPushed(event) {
+  if (event.key == 'Escape') {
+    closeTheOverlay();
+  } else if (event.key == 'ArrowLeft') {
+    const prerviousImageIndex = originalImagesArray.indexOf(bigImage.src) - 1;
+    bigImage.src = originalImagesArray[prerviousImageIndex];
+  } else if (event.key == 'ArrowRight') {
+    const prerviousImageIndex = originalImagesArray.indexOf(bigImage.src) + 1;
+    bigImage.src = originalImagesArray[prerviousImageIndex];
+  }
+};
