@@ -129,7 +129,7 @@ function isButtonPushed(event) {
     const prerviousImageIndex = originalImagesArray.indexOf(bigImage.src) - 1;
     bigImage.src = originalImagesArray[prerviousImageIndex];
   } else if (event.key == 'ArrowRight') {
-    const prerviousImageIndex = originalImagesArray.indexOf(bigImage.src) + 1;
-    bigImage.src = originalImagesArray[prerviousImageIndex];
+    const nextImageIndex = originalImagesArray.indexOf(bigImage.src) + 1;
+    bigImage.src = originalImagesArray[nextImageIndex];
   }
 };
